@@ -28,7 +28,7 @@ DATABASE_CONFIG = {
 }
 
 from fastapi import FastAPI
-import psycopg
+
 
 app = FastAPI(title="Project Pulse API")
 
