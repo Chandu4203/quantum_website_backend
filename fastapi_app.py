@@ -28,13 +28,14 @@ DATABASE_CONFIG = {
 }
 
 from fastapi import FastAPI
+import psycopg
 
 app = FastAPI(title="Project Pulse API")
 
 @app.get("/api/test")
 def test():
+    # Don't connect to DB here if you haven't set DATABASE_URL yet
     return {"message": "Backend is working!"}   
-
 MEMBERS = {
     "23BQ1A4202": ("A.Sai Charan", "23BQ1A4202"),
     "23BQ1A4231": ("CH.Aparna", "23BQ1A4231"),
