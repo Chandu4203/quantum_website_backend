@@ -10,26 +10,28 @@ const jwtSecret = process.env.JWT_SECRET || 'project-pulse-development-secret-ch
 const demoEmail = (process.env.DEMO_EMAIL || 'member@project.com').toLowerCase();
 const demoPassword = process.env.DEMO_PASSWORD || 'pulse2026';
 const memberDisplayNames = {
-  '23BQ1A4202': 'A.Sa Charan',
+  '23BQ1A4202': 'A.Sai Charan',
   '23BQ1A4231': 'CH.Aparna',
   '23BQ1A4251': 'G.Kamesh',
   '24BQ5A4202': 'K.chandra sekhar'
 };
 
 const pool = new Pool({
-  host: "localhost",
-  user: "postgres",
-  password: "5477",
-  database: "quantum",
-  port: 5432
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 pool.connect()
-  .then(() => console.log("PostgreSQL connected"))
+  .then(client => {
+    console.log('PostgreSQL connected');
+    client.release();
+  })
   .catch(err => {
-    console.error("PostgreSQL connection failed:", err.message);
+    console.error('PostgreSQL connection failed:', err.message, err.code);
     process.exit(1);
   });
+
+  console.log('DATABASE_URL set?', !!process.env.DATABASE_URL);
 
 const hashPassword = (password, salt = crypto.randomBytes(16).toString('hex')) => `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`;
 const verifyPassword = (password, storedHash) => {
@@ -38,7 +40,7 @@ const verifyPassword = (password, storedHash) => {
   return crypto.timingSafeEqual(Buffer.from(actual, 'hex'), Buffer.from(expected, 'hex'));
 };
 const memberAccounts = [
-  ['23BQ1A4202', 'A.Sa Charan', '23BQ1A4202'],
+  ['23BQ1A4202', 'A.Sai Charan', '23BQ1A4202'],
   ['23BQ1A4231', 'CH.Aparna', '23BQ1A4231'],
   ['23BQ1A4251', 'G.Kamesh', '23BQ1A4251'],
   ['24BQ5A4203', 'K.chandra sekhar', '24BQ5A4203']
@@ -126,6 +128,10 @@ function serveStatic(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.url === '/api/health' && request.method === 'GET') {
+      sendJson(response, 200, { status: 'ok', message: 'Backend is running' });
+      return;
+    }
     if (request.url === '/api/login' && request.method === 'POST') {
       const { username, password } = await readBody(request);
       const identifier = typeof username === 'string' ? username.trim() : '';

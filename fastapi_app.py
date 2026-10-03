@@ -27,7 +27,13 @@ DATABASE_CONFIG = {
     "sslmode": "require" if os.getenv("DATABASE_SSL", "false").lower() == "true" else "disable",
 }
 
+from fastapi import FastAPI
+
 app = FastAPI(title="Project Pulse API")
+
+@app.get("/api/test")
+def test():
+    return {"message": "Backend is working!"}   
 
 MEMBERS = {
     "23BQ1A4202": ("A.Sai Charan", "23BQ1A4202"),
